@@ -13,7 +13,6 @@ const Dashboard = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Handle adding/updating a widget
   const handleAddWidget = (categoryId, widgetName, widgetType, widgetData) => {
     if (editingWidget) {
       setCategories(prevCategories =>
@@ -49,7 +48,6 @@ const Dashboard = () => {
     setEditingWidget(null);
   };
 
-  // Handle removing a widget
   const handleRemoveWidget = (categoryId, widgetId) => {
     setCategories(prevCategories =>
       prevCategories.map(category =>
@@ -63,7 +61,6 @@ const Dashboard = () => {
     );
   };
 
-  // Handle editing a widget
   const handleEditWidget = (widget) => {
     setEditingWidget(widget);
     const category = categories.find(cat =>
@@ -73,14 +70,12 @@ const Dashboard = () => {
     setShowModal(true);
   };
 
-  // Handle deleting a category
   const handleDeleteCategory = (categoryId) => {
     setCategories(prevCategories =>
       prevCategories.filter(category => category.id !== categoryId)
     );
   };
 
-  // Handle creating a new category
   const handleCreateCategory = () => {
     const newCategory = {
       id: Date.now(),
@@ -92,7 +87,6 @@ const Dashboard = () => {
     setShowCategoryModal(false);
   };
 
-  // Filter categories based on the search term
   const filteredCategories = categories.map(category => ({
     ...category,
     widgets: category.widgets.filter(widget =>
@@ -113,14 +107,12 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Button to create a new category */}
       <div className="create-category-btn">
         <button onClick={() => setShowCategoryModal(true)} className="btn-create-category">
           Create New Category
         </button>
       </div>
 
-      {/* Modal for creating a new category */}
       {showCategoryModal && (
         <div className="modal-overlay">
           <div className="modal">

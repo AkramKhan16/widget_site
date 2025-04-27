@@ -1,4 +1,3 @@
-//final code
 import { React, useState, useEffect } from 'react';
 
 const AddWidgetModel = ({ onClose, onAdd, editingWidget }) => {
@@ -18,7 +17,7 @@ const AddWidgetModel = ({ onClose, onAdd, editingWidget }) => {
         setColors(editingWidget.data.colors?.join(', ') || '');
       }
     } else {
-      // Reset form when adding new widget
+    
       setWidgetName('');
       setWidgetType('donut');
       setLabels('');
