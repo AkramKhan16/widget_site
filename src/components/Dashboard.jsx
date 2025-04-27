@@ -1,98 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { 
+  initialize, 
+  addCategory, 
+  deleteCategory, 
+  addWidget, 
+  updateWidget, 
+  removeWidget 
+} from '../store/dashboardSlice';
 import Widget from './Widget';
 import AddWidgetModel from './AddWidgetModel';
+import AddCategoryModal from './AddCategoryModal';
 import dashboardData from '../data/dashboardData.json';
 import '../styles.css';
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [categories, setCategories] = useState(dashboardData.categories);
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [editingWidget, setEditingWidget] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  
+  const categories = useSelector(state => state.dashboard.categories);
+  const dispatch = useDispatch();
 
-  const handleAddWidget = (categoryId, widgetName, widgetType, widgetData) => {
-    if (editingWidget) {
-      setCategories(prevCategories =>
-        prevCategories.map(category => ({
-          ...category,
-          widgets: category.widgets.map(widget =>
-            widget.id === editingWidget.id
-              ? {
-                  ...widget,
-                  name: widgetName,
-                  type: widgetType,
-                  data: widgetData
-                }
-              : widget
-          )
-        }))
-      );
-    } else {
-      const newWidget = {
-        id: Date.now(),
-        name: widgetName,
-        type: widgetType,
-        data: widgetData
-      };
-      setCategories(prevCategories =>
-        prevCategories.map(category =>
-          category.id === categoryId
-            ? { ...category, widgets: [...category.widgets, newWidget] }
-            : category
-        )
-      );
-    }
-    setEditingWidget(null);
-  };
+  useEffect(() => {
+    dispatch(initialize(dashboardData));
+  }, [dispatch]);
 
-  const handleRemoveWidget = (categoryId, widgetId) => {
-    setCategories(prevCategories =>
-      prevCategories.map(category =>
-        category.id === categoryId
-          ? {
-              ...category,
-              widgets: category.widgets.filter(widget => widget.id !== widgetId)
-            }
-          : category
-      )
-    );
-  };
-
-  const handleEditWidget = (widget) => {
-    setEditingWidget(widget);
-    const category = categories.find(cat =>
-      cat.widgets.some(w => w.id === widget.id)
-    );
-    setSelectedCategory(category.id);
-    setShowModal(true);
-  };
-
-  const handleDeleteCategory = (categoryId) => {
-    setCategories(prevCategories =>
-      prevCategories.filter(category => category.id !== categoryId)
-    );
-  };
-
-  const handleCreateCategory = () => {
-    const newCategory = {
-      id: Date.now(),
-      name: newCategoryName,
-      widgets: []
-    };
-    setCategories(prevCategories => [...prevCategories, newCategory]);
-    setNewCategoryName('');
+  const handleCreateCategory = (name) => {
+    dispatch(addCategory(name));
     setShowCategoryModal(false);
   };
 
-  const filteredCategories = categories.map(category => ({
-    ...category,
-    widgets: category.widgets.filter(widget =>
-      widget.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }));
+  const handleDeleteCategory = (categoryId) => {
+    dispatch(deleteCategory(categoryId));
+  };
+
+  const handleRemoveWidget = (categoryId, widgetId) => {
+    dispatch(removeWidget({ categoryId, widgetId }));
+  };
+
+  const handleAddWidget = (categoryId, widgetName, widgetType, widgetData) => {
+    const newWidget = {
+      id: Date.now(),
+      name: widgetName,
+      type: widgetType,
+      data: {
+        labels: widgetData?.labels || [],
+        values: widgetData?.values || [],
+        colors: widgetData?.colors || []
+      }
+    };
+    
+    dispatch(addWidget({ 
+      categoryId: categoryId || selectedCategoryId, 
+      widget: newWidget 
+    }));
+    setShowModal(false);
+  };
+
+  const handleUpdateWidget = (categoryId, widgetId, widgetName, widgetType, widgetData) => {
+    const updatedWidget = {
+      id: widgetId,
+      name: widgetName,
+      type: widgetType,
+      data: {
+        labels: widgetData?.labels || [],
+        values: widgetData?.values || [],
+        colors: widgetData?.colors || []
+      }
+    };
+    
+    dispatch(updateWidget({ 
+      categoryId, 
+      widgetId, 
+      updatedWidget 
+    }));
+    setShowModal(false);
+  };
+
+  const handleWidgetSubmit = (categoryId, widgetName, widgetType, widgetData) => {
+    if (editingWidget) {
+      handleUpdateWidget(categoryId, editingWidget.id, widgetName, widgetType, widgetData);
+    } else {
+      handleAddWidget(categoryId, widgetName, widgetType, widgetData);
+    }
+    setEditingWidget(null);
+  };
 
   return (
     <div className="dashboard">
@@ -108,56 +103,35 @@ const Dashboard = () => {
       </div>
 
       <div className="create-category-btn">
-        <button onClick={() => setShowCategoryModal(true)} className="btn-create-category">
+        <button 
+          onClick={() => setShowCategoryModal(true)} 
+          className="btn-create-category"
+        >
           Create New Category
         </button>
       </div>
 
       {showCategoryModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h2>Create New Category</h2>
-              <button onClick={() => setShowCategoryModal(false)} className="close-btn">&times;</button>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleCreateCategory();
-              }}
-            >
-              <div className="form-group">
-                <label>Category Name</label>
-                <input
-                  type="text"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-actions">
-                <button type="button" onClick={() => setShowCategoryModal(false)} className="cancel-btn">
-                  Cancel
-                </button>
-                <button type="submit" className="submit-btn">Create Category</button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddCategoryModal 
+          onClose={() => setShowCategoryModal(false)}
+          onAdd={handleCreateCategory}
+        />
       )}
 
-      {filteredCategories.map(category => (
+      {categories.map(category => (
         <section key={category.id} className="category-section">
           <div className="category-header">
             <h2>{category.name}</h2>
             <div className="category-actions">
-              <button onClick={() => handleDeleteCategory(category.id)} className="delete-category-btn">
+              <button 
+                onClick={() => handleDeleteCategory(category.id)} 
+                className="delete-category-btn"
+              >
                 Delete Category
               </button>
               <button
                 onClick={() => {
-                  setSelectedCategory(category.id);
-                  setEditingWidget(null);
+                  setSelectedCategoryId(category.id);
                   setShowModal(true);
                 }}
                 className="add-widget-btn"
@@ -167,14 +141,22 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="widgets-grid">
-            {category.widgets.map(widget => (
-              <Widget
-                key={widget.id}
-                widget={widget}
-                onRemove={() => handleRemoveWidget(category.id, widget.id)}
-                onEdit={() => handleEditWidget(widget)}
-              />
-            ))}
+            {category.widgets
+              .filter(widget => 
+                widget.name.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map(widget => (
+                <Widget
+                  key={widget.id}
+                  widget={widget}
+                  onRemove={() => handleRemoveWidget(category.id, widget.id)}
+                  onEdit={() => {
+                    setEditingWidget(widget);
+                    setSelectedCategoryId(category.id);
+                    setShowModal(true);
+                  }}
+                />
+              ))}
           </div>
         </section>
       ))}
@@ -185,11 +167,9 @@ const Dashboard = () => {
             setShowModal(false);
             setEditingWidget(null);
           }}
-          onAdd={(name, type, data) => {
-            handleAddWidget(selectedCategory, name, type, data);
-            setShowModal(false);
-          }}
+          onAdd={handleWidgetSubmit}
           editingWidget={editingWidget}
+          selectedCategoryId={selectedCategoryId}
         />
       )}
     </div>

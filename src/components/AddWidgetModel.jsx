@@ -1,6 +1,12 @@
-import { React, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
-const AddWidgetModel = ({ onClose, onAdd, editingWidget }) => {
+const AddWidgetModel = ({ 
+  onClose, 
+  onAdd, 
+  editingWidget,
+  selectedCategoryId 
+}) => {
   const [widgetName, setWidgetName] = useState('');
   const [widgetType, setWidgetType] = useState('donut');
   const [labels, setLabels] = useState('');
@@ -17,7 +23,6 @@ const AddWidgetModel = ({ onClose, onAdd, editingWidget }) => {
         setColors(editingWidget.data.colors?.join(', ') || '');
       }
     } else {
-    
       setWidgetName('');
       setWidgetType('donut');
       setLabels('');
@@ -37,7 +42,7 @@ const AddWidgetModel = ({ onClose, onAdd, editingWidget }) => {
           colors: colors.split(',').map(item => item.trim())
         };
     
-    onAdd(widgetName, widgetType, widgetData);
+    onAdd(selectedCategoryId, widgetName, widgetType, widgetData);
   };
 
   return (
@@ -119,6 +124,17 @@ const AddWidgetModel = ({ onClose, onAdd, editingWidget }) => {
       </div>
     </div>
   );
+};
+
+AddWidgetModel.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired,
+  editingWidget: PropTypes.object,
+  selectedCategoryId: PropTypes.number.isRequired
+};
+
+AddWidgetModel.defaultProps = {
+  editingWidget: null
 };
 
 export default AddWidgetModel;

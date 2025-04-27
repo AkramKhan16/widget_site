@@ -1,3 +1,4 @@
+//Final Code
 import { React, useState } from 'react';
 
 const AddCategoryModal = ({ onClose, onAdd }) => {
