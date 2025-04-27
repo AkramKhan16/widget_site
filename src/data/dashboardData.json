@@ -1,0 +1,46 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "CSPM Executive Dashboard",
+      "widgets": [
+        {
+          "id": 1,
+          "name": "Security Compliance",
+          "type": "donut",
+          "data": {
+            "labels": ["Compliant", "Non-Compliant"],
+            "values": [75, 25],
+            "colors": ["limegreen", "tomato"]
+          }
+        },
+        {
+          "id": 2,
+          "name": "Threat Distribution",
+          "type": "pie",
+          "data": {
+            "labels": ["Malware", "Phishing", "DDoS", "Insider"],
+            "values": [40, 30, 20, 10],
+            "colors": ["red", "purple", "gold", "orange"]
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Performance Metrics",
+      "widgets": [
+        {
+          "id": 3,
+          "name": "CPU Usage",
+          "type": "donut",
+          "data": {
+            "labels": ["Used", "Available"],
+            "values": [65, 35],
+            "colors": ["crimson", "limegreen"]
+          }
+        }
+      ]
+    }
+  ]
+}
